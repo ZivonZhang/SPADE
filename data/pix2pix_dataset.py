@@ -34,7 +34,11 @@ class Pix2pixDataset(BaseDataset):
             for path1, path2 in zip(label_paths, image_paths):
                 assert self.paths_match(path1, path2), \
                     "The label-image pair (%s, %s) do not look like the right pair because the filenames are quite different. Are you sure about the pairing? Please see data/pix2pix_dataset.py to see what is going on, and use --no_pairing_check to bypass this." % (path1, path2)
-
+        else:
+            for path1, path2 in zip(label_paths, image_paths):
+                assert self.number_match(path1,path2) , \
+                    "The label-image pair (%s, %s) do not look like the right pair because the filenames are quite different. Are you sure about the pairing? Please see data/pix2pix_dataset.py to see what is going on, and use --no_pairing_check to bypass this." % (path1, path2)
+        
         self.label_paths = label_paths
         self.image_paths = image_paths
         self.instance_paths = instance_paths
@@ -54,18 +58,26 @@ class Pix2pixDataset(BaseDataset):
         filename2_without_ext = os.path.splitext(os.path.basename(path2))[0]
         return filename1_without_ext == filename2_without_ext
 
+    def number_match(self, path1, path2):
+        filename1_without_ext = os.path.basename(path1).split('_')[0]
+        filename2_without_ext = os.path.basename(path2).split('_')[0]
+        return filename1_without_ext == filename2_without_ext
+
     def __getitem__(self, index):
-        # Label Image
+        # Label Image 
         label_path = self.label_paths[index]
         label = Image.open(label_path)
+        label = label.convert('RGB')
         params = get_params(self.opt, label.size)
         transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
-        label_tensor = transform_label(label) * 255.0
-        label_tensor[label_tensor == 255] = self.opt.label_nc  # 'unknown' is opt.label_nc
+        label_tensor = transform_label(label)
+        # pre
+        #label_tensor = transform_label(label) * 255.0
+        #label_tensor[label_tensor == 255] = self.opt.label_nc  # 'unknown' is opt.label_nc
 
-        # input image (real images)
+        # input image (real images) target
         image_path = self.image_paths[index]
-        assert self.paths_match(label_path, image_path), \
+        assert self.number_match(label_path, image_path), \
             "The label_path %s and image_path %s don't match." % \
             (label_path, image_path)
         image = Image.open(image_path)

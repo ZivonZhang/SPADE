@@ -1,0 +1,1 @@
+python train.py  --no_pairing_check --gpu_ids 1 --name hazeToClear --dataset_mode custom --no_instance --label_dir /home/tangqf/SSD_disk/Fog_Data/NYU_Hazy  --image_dir /home/tangqf/SSD_disk/Fog_Data/NYU_GT
