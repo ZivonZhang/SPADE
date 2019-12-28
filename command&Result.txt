@@ -1,1 +1,9 @@
-python train.py  --no_pairing_check --gpu_ids 1 --name hazeToClear --dataset_mode custom --no_instance --label_dir /home/tangqf/SSD_disk/Fog_Data/NYU_Hazy  --image_dir /home/tangqf/SSD_disk/Fog_Data/NYU_GT
+python train.py  --gpu_ids 1 --name hazeToClear  --continue_train --niter 100
+
+python test.py --name hazeToClear --dataroot [path_to_dataset]
+
+
+python train.py  --gpu_ids 1 --name ClearToClear  --niter 5 --label_dir /home/tangqf/SSD_disk/Fog_Data/NYU_GT
+
+# 201912228 0920
+python train.py  --gpu_ids 1 --name hazeToClear --niter 20

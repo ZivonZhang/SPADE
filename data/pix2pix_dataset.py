@@ -12,7 +12,7 @@ import os
 class Pix2pixDataset(BaseDataset):
     @staticmethod
     def modify_commandline_options(parser, is_train):
-        parser.add_argument('--no_pairing_check', action='store_true',
+        parser.add_argument('--no_pairing_check', default = True, action='store_true',
                             help='If specified, skip sanity check of correct label-image file pairing')
         return parser
 
@@ -69,8 +69,11 @@ class Pix2pixDataset(BaseDataset):
         label = Image.open(label_path)
         label = label.convert('RGB')
         params = get_params(self.opt, label.size)
-        transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
+        transform_label = get_transform(self.opt, params) #method=Image.NEAREST , normalize=False
+        #transform_label = get_transform(self.opt, params)
         label_tensor = transform_label(label)
+        #print(label_tensor)
+        
         # pre
         #label_tensor = transform_label(label) * 255.0
         #label_tensor[label_tensor == 255] = self.opt.label_nc  # 'unknown' is opt.label_nc

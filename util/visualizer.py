@@ -77,7 +77,7 @@ class Visualizer():
                     util.save_image(image_numpy, img_path)
 
             # update website
-            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=5)
+            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=60)
             for n in range(epoch, 0, -1):
                 webpage.add_header('epoch [%d]' % n)
                 ims = []
@@ -128,10 +128,13 @@ class Visualizer():
     def convert_visuals_to_numpy(self, visuals):
         for key, t in visuals.items():
             tile = self.opt.batchSize > 8
+            '''  # 原本的
             if 'input_label' == key:
                 t = util.tensor2label(t, self.opt.label_nc + 2, tile=tile)
             else:
                 t = util.tensor2im(t, tile=tile)
+            '''
+            t = util.tensor2im(t, tile=tile)
             visuals[key] = t
         return visuals
 

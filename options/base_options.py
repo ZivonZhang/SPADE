@@ -41,7 +41,7 @@ class BaseOptions():
 
         # for setting inputs
         parser.add_argument('--dataroot', type=str, default='./datasets/cityscapes/')
-        parser.add_argument('--dataset_mode', type=str, default='coco')
+        parser.add_argument('--dataset_mode', type=str, default='custom')  #'coco'
         parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data argumentation')
         parser.add_argument('--nThreads', default=0, type=int, help='# threads for loading data')
@@ -62,7 +62,7 @@ class BaseOptions():
                             help="dimension of the latent z vector")
 
         # for instance-wise features
-        parser.add_argument('--no_instance', action='store_true', help='if specified, do *not* add instance map as input')
+        parser.add_argument('--no_instance', default=True , action='store_true', help='if specified, do *not* add instance map as input')
         parser.add_argument('--nef', type=int, default=16, help='# of encoder filters in the first conv layer')
         parser.add_argument('--use_vae', action='store_true', help='enable training with an image encoder.')
 

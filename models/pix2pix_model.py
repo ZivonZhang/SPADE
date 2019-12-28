@@ -39,7 +39,7 @@ class Pix2PixModel(torch.nn.Module):
     # can't parallelize custom functions, we branch to different
     # routines based on |mode|.
     def forward(self, data, mode):
-        input_semantics, real_image = self.preprocess_input(data)
+        input_semantics, real_image = self.preprocess_input(data) ## 送入前预处理 now input_semantics is haze Image
 
         if mode == 'generator':
             g_loss, generated = self.compute_generator_loss(
@@ -107,27 +107,35 @@ class Pix2PixModel(torch.nn.Module):
 
     def preprocess_input(self, data):
         # move to GPU and change data types
-        data['label'] = data['label'].long()
         if self.use_gpu():
-            data['label'] = data['label'].cuda()
-            data['instance'] = data['instance'].cuda()
-            data['image'] = data['image'].cuda()
+                data['label'] = data['label'].cuda()
+                data['instance'] = data['instance'].cuda()
+                data['image'] = data['image'].cuda()
+        return data['label'], data['image']
+        '''
+            data['label'] = data['label'].long()  # 原code 此处应该是 0-255的数
+            if self.use_gpu():
+                data['label'] = data['label'].cuda()
+                data['instance'] = data['instance'].cuda()
+                data['image'] = data['image'].cuda()
 
-        # create one-hot label map
-        label_map = data['label']
-        bs, _, h, w = label_map.size()
-        nc = self.opt.label_nc + 1 if self.opt.contain_dontcare_label \
-            else self.opt.label_nc
-        input_label = self.FloatTensor(bs, nc, h, w).zero_()
-        input_semantics = input_label.scatter_(1, label_map, 1.0)
+            # create one-hot label map 目的是生成 nc （类别数）通道的 one-hot 图像
+            label_map = data['label']
+            bs, _, h, w = label_map.size()
+            nc = self.opt.label_nc + 1 if self.opt.contain_dontcare_label \
+                else self.opt.label_nc
+            input_label = self.FloatTensor(bs, nc, h, w).zero_()
+            input_semantics = input_label.scatter_(1, label_map, 1.0)   
+            # scatter参考  https://pytorch-cn.readthedocs.io/zh/latest/package_references/Tensor/#scatter_input-dim-index-src-tensor
 
-        # concatenate instance map if it exists
-        if not self.opt.no_instance:
-            inst_map = data['instance']
-            instance_edge_map = self.get_edges(inst_map)
-            input_semantics = torch.cat((input_semantics, instance_edge_map), dim=1)
-
-        return input_semantics, data['image']
+            # concatenate instance map if it exists
+            if not self.opt.no_instance:
+                inst_map = data['instance']
+                instance_edge_map = self.get_edges(inst_map)
+                input_semantics = torch.cat((input_semantics, instance_edge_map), dim=1)
+        
+            return input_semantics, data['image']
+        '''
 
     def compute_generator_loss(self, input_semantics, real_image):
         G_losses = {}
