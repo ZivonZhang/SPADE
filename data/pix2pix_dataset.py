@@ -50,7 +50,7 @@ class Pix2pixDataset(BaseDataset):
         label_paths = []
         image_paths = []
         instance_paths = []
-        assert False, "A subclass of Pix2pixDataset must override self.get_paths(self, opt)"
+        # assert False, "A subclass of Pix2pixDataset must override self.get_paths(self, opt)"
         return label_paths, image_paths, instance_paths
 
     def paths_match(self, path1, path2):
@@ -73,7 +73,7 @@ class Pix2pixDataset(BaseDataset):
         #transform_label = get_transform(self.opt, params)
         label_tensor = transform_label(label)
         #print(label_tensor)
-        
+
         # pre
         #label_tensor = transform_label(label) * 255.0
         #label_tensor[label_tensor == 255] = self.opt.label_nc  # 'unknown' is opt.label_nc
