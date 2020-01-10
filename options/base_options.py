@@ -40,11 +40,11 @@ class BaseOptions():
         parser.add_argument('--output_nc', type=int, default=3, help='# of output image channels')
 
         # for setting inputs
-        parser.add_argument('--dataroot', type=str, default='./datasets/cityscapes/')
+        parser.add_argument('--dataroot', type=str, default='NeedFill')# default='./datasets/cityscapes/')
         parser.add_argument('--dataset_mode', type=str, default='custom',required=True)  #'coco'
         parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data argumentation')
-        parser.add_argument('--nThreads', default=0, type=int, help='# threads for loading data')
+        parser.add_argument('--nThreads', default=4, type=int, help='# threads for loading data')
         parser.add_argument('--max_dataset_size', type=int, default=sys.maxsize, help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
         parser.add_argument('--load_from_opt_file', action='store_true', help='load the options from checkpoints and use that as default')
         parser.add_argument('--cache_filelist_write', action='store_true', help='saves the current filelist into a text file, so that it loads faster')
@@ -65,6 +65,13 @@ class BaseOptions():
         parser.add_argument('--no_instance', default=True , action='store_true', help='if specified, do *not* add instance map as input')
         parser.add_argument('--nef', type=int, default=16, help='# of encoder filters in the first conv layer')
         parser.add_argument('--use_vae', action='store_true', help='enable training with an image encoder.')
+
+        # Custom
+        parser.add_argument('--mask', action='store_true', help='output use mask.')
+        parser.add_argument('--use_depth', action='store_true', help="If 'True', use depth infomation in Normalization")
+        parser.add_argument('--not_use_cross', action='store_true', help="If 'True', not use cross information of depth and input in Normalization")
+        parser.add_argument('--use_512',type=bool,default=True,required=True)
+        
 
         self.initialized = True
         return parser

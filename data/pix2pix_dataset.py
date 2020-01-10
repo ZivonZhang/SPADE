@@ -19,7 +19,7 @@ class Pix2pixDataset(BaseDataset):
     def initialize(self, opt):
         self.opt = opt
 
-        label_paths, image_paths, instance_paths = self.get_paths(opt)
+        label_paths, image_paths, instance_paths, depth_paths = self.get_paths(opt)
 
         util.natural_sort(label_paths)
         util.natural_sort(image_paths)
@@ -29,6 +29,7 @@ class Pix2pixDataset(BaseDataset):
         label_paths = label_paths[:opt.max_dataset_size]
         image_paths = image_paths[:opt.max_dataset_size]
         instance_paths = instance_paths[:opt.max_dataset_size]
+        depth_paths = depth_paths[:opt.max_dataset_size]
 
         if not opt.no_pairing_check:
             for path1, path2 in zip(label_paths, image_paths):
@@ -39,9 +40,14 @@ class Pix2pixDataset(BaseDataset):
                 assert self.number_match(path1,path2) , \
                     "The label-image pair (%s, %s) do not look like the right pair because the filenames are quite different. Are you sure about the pairing? Please see data/pix2pix_dataset.py to see what is going on, and use --no_pairing_check to bypass this." % (path1, path2)
         
+        if opt.use_depth:
+            for path1, path2 in zip(image_paths, depth_paths):
+                assert self.number_match(path1,path2) , \
+                    "The depth-image pair (%s, %s) do not look like the right pair because the filenames are quite different. Are you sure about the pairing? Please see data/pix2pix_dataset.py to see what is going on, and use --no_pairing_check to bypass this." % (path1, path2)
         self.label_paths = label_paths
         self.image_paths = image_paths
         self.instance_paths = instance_paths
+        self.depth_paths = depth_paths
 
         size = len(self.label_paths)
         self.dataset_size = size
@@ -100,10 +106,23 @@ class Pix2pixDataset(BaseDataset):
                 instance_tensor = instance_tensor.long()
             else:
                 instance_tensor = transform_label(instance)
+        
+        # if using depth information
+        if not self.opt.use_depth:
+            depth_tensor = 0
+        else:
+            depth_path = self.depth_paths[index]
+            depth = Image.open(depth_path)
+            depth = depth.convert('RGB')
+
+            transform_depth = get_transform(self.opt, params,isdepth=True)
+            depth_tensor = transform_depth(depth)
+            
 
         input_dict = {'label': label_tensor,
                       'instance': instance_tensor,
                       'image': image_tensor,
+                      'depth':depth_tensor,
                       'path': image_path,
                       }
 

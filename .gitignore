@@ -1,7 +1,8 @@
 checkpoints/
-results/
+TESTresults/
 .idea/
 *.tar.gz
 *.zip
 *.pkl
 *.pyc
+*.png

@@ -33,12 +33,12 @@ def make_dataset_rec(dir, images):
                 images.append(path)
 
 
-def make_dataset(dir, recursive=False, read_cache=False, write_cache=False):
+def make_dataset(dir, recursive=False, read_cache=False, write_cache=False):  # default : recursive=False, read_cache=True
     images = []
 
     if read_cache:
         possible_filelist = os.path.join(dir, 'files.list')
-        if os.path.isfile(possible_filelist):
+        if os.path.isfile(possible_filelist): # default : not
             with open(possible_filelist, 'r') as f:
                 images = f.read().splitlines()
                 return images
@@ -48,7 +48,7 @@ def make_dataset(dir, recursive=False, read_cache=False, write_cache=False):
     else:
         assert os.path.isdir(dir) or os.path.islink(dir), '%s is not a valid directory' % dir
 
-        for root, dnames, fnames in sorted(os.walk(dir)):
+        for root, dnames, fnames in sorted(os.walk(dir)): #进到这里，怎么实现随机的
             for fname in fnames:
                 if is_image_file(fname):
                     path = os.path.join(root, fname)

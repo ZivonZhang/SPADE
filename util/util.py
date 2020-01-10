@@ -14,6 +14,20 @@ import argparse
 import dill as pickle
 import util.coco
 
+from skimage.measure import compare_psnr as psnr
+from skimage.measure import compare_ssim as ssim
+
+def compute_psnr(im1, im2):
+    p = psnr(im1, im2)
+    return p
+
+
+def compute_ssim(im1, im2):
+    isRGB = len(im1.shape) == 3 and im1.shape[-1] == 3
+    s = ssim(im1, im2, K1=0.01, K2=0.03, gaussian_weights=True, sigma=1.5, use_sample_covariance=False,
+             multichannel=isRGB)  # Here has too mush parms. 
+    return s
+
 
 def save_obj(obj, name):
     with open(name, 'wb') as f:

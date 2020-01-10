@@ -23,23 +23,37 @@ class ResideDataset(Pix2pixDataset):
     def modify_commandline_options(parser, is_train):
         parser = Pix2pixDataset.modify_commandline_options(parser, is_train)
         parser.set_defaults(preprocess_mode='resize_and_crop')
-        load_size = 286 if is_train else 256 #286 if is_train else 256
-        parser.set_defaults(load_size=load_size)
-        parser.set_defaults(crop_size=256)
-        parser.set_defaults(display_winsize=256)
+        
+        if parser.get_default('use_512'):
+            load_size = 576 if is_train else 512 #286 if is_train else 256
+            parser.set_defaults(load_size=load_size)
+            parser.set_defaults(crop_size=512)
+            parser.set_defaults(display_winsize=512)
+        else:
+            load_size = 286 if is_train else 256 #286 if is_train else 256
+            parser.set_defaults(load_size=load_size)
+            parser.set_defaults(crop_size=256)
+            parser.set_defaults(display_winsize=256)
         parser.set_defaults(label_nc=3)  #13
         parser.set_defaults(contain_dontcare_label=False)
         # Resume
-        parser.add_argument('--data_root', type=str, default='/home/tangqf/SSD_disk/ITS/ITS')
-        parser.add_argument('--train_file',type=str, default='train_file.txt')
-        parser.add_argument('--val_file',type=str, default='val_file.txt')
+        parser.add_argument('--data_root', type=str, default = r'/home/tangqf/SSD_disk/ITS/ITS')
+        parser.add_argument('--depth_dir', type=str, default = r'/home/Data/ZivonZhang/bts/Pro_fog',
+                            help='path to the directory that contains depth images')
+        parser.add_argument('--train_file',type=str, default=r'train_file.txt')
+        parser.add_argument('--val_file',type=str, default=r'val_file.txt')
 
         return parser
         
     def initialize(self, opt):
         self.opt = opt
-        ## 此处需要修改，目前值使用了训练集
-        data_file = os.path.join(opt.data_root, opt.train_file)
+        ## 
+        if opt.isTrain:
+            data_file = os.path.join(opt.data_root, opt.train_file)
+        else:
+            data_file = os.path.join(opt.data_root, opt.val_file)
+
+        print("Load data_file:" , data_file)
         
         with open(data_file, 'r') as f:  # 此处读入txt内存储的相对地址
             data = f.readlines() 
@@ -49,20 +63,32 @@ class ResideDataset(Pix2pixDataset):
         self.dataset_size = size
 
     def number_match(self, path1, path2):
-        filename1_without_ext = os.path.basename(path1).split('_')[0]
-        filename2_without_ext = os.path.basename(path2).split('.')[0]
+        if not self.opt.mask:
+            filename1_without_ext = os.path.basename(path1).split('_')[0]
+            filename2_without_ext = os.path.basename(path2).split('.')[0]
+        else:
+            filename1_without_ext = os.path.basename(path1).split('_')[0]
+            filename2_without_ext = os.path.basename(path2).split('_')[0]
+
         return filename1_without_ext == filename2_without_ext
 
     def __getitem__(self, index):
         if 'ITS' in self.opt.data_root or 'OTS' in self.opt.data_root:
-            haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
-            haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
-            gt_path = os.path.join(self.opt.data_root, gt_path)
-            #if self.args.depth or self.args.depth_out:
-            #    depth_path = haze_path.replace(self.args.data_root,self.args.depth_root,1)  # 相应的深度图路径
-            #    gt_dp_path = gt_path.replace(self.args.data_root,self.args.depth_root,1)
+            if not self.opt.mask:
+                haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
+                haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
+                gt_path = os.path.join(self.opt.data_root, gt_path)
+                if self.opt.use_depth :
+                    #depth_path = haze_path.replace(self.args.data_root,self.args.depth_root,1)  # 相应的深度图路径
+                    gt_dp_path = gt_path.replace(self.opt.data_root,self.opt.depth_dir,1)
+            else:
+                haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
+                haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
+
+                gt_path = gt_path.replace('clear','trans').replace('.png','_'+os.path.basename(haze_path).split('_')[1] + '.png')  # train/ITS_trans/9542_01.png`
+                gt_path = os.path.join(self.opt.data_root, gt_path)
         else:
-            raise
+            raise ValueError("Not Reside Dataset")
 
         # Label Image 
         label_path = haze_path
@@ -102,9 +128,22 @@ class ResideDataset(Pix2pixDataset):
             else:
                 instance_tensor = transform_label(instance)
 
+         # if using depth information
+        if not self.opt.use_depth:
+            depth_tensor = 0
+        else:
+            depth_path = gt_dp_path
+            #print(depth_path)
+            depth = Image.open(depth_path)
+            depth = depth.convert('RGB')
+
+            transform_depth = get_transform(self.opt, params, isdepth=True)
+            depth_tensor = transform_depth(depth)
+
         input_dict = {'label': label_tensor,
                       'instance': instance_tensor,
                       'image': image_tensor,
+                      'depth':depth_tensor,
                       'path': image_path,
                       }
 
