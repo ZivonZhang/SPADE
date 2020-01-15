@@ -63,30 +63,30 @@ class ResideDataset(Pix2pixDataset):
         self.dataset_size = size
 
     def number_match(self, path1, path2):
-        if not self.opt.mask:
-            filename1_without_ext = os.path.basename(path1).split('_')[0]
-            filename2_without_ext = os.path.basename(path2).split('.')[0]
-        else:
-            filename1_without_ext = os.path.basename(path1).split('_')[0]
-            filename2_without_ext = os.path.basename(path2).split('_')[0]
+        #if not self.opt.mask:
+        filename1_without_ext = os.path.basename(path1).split('_')[0]
+        filename2_without_ext = os.path.basename(path2).split('.')[0]
+        #else:
+        #    filename1_without_ext = os.path.basename(path1).split('_')[0]
+         #   filename2_without_ext = os.path.basename(path2).split('_')[0]
 
         return filename1_without_ext == filename2_without_ext
 
     def __getitem__(self, index):
         if 'ITS' in self.opt.data_root or 'OTS' in self.opt.data_root:
-            if not self.opt.mask:
-                haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
-                haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
-                gt_path = os.path.join(self.opt.data_root, gt_path)
-                if self.opt.use_depth :
-                    #depth_path = haze_path.replace(self.args.data_root,self.args.depth_root,1)  # 相应的深度图路径
-                    gt_dp_path = gt_path.replace(self.opt.data_root,self.opt.depth_dir,1)
-            else:
-                haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
-                haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
+            #if not self.opt.mask:
+            haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
+            haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
+            gt_path = os.path.join(self.opt.data_root, gt_path)
+            if self.opt.use_depth :
+                #depth_path = haze_path.replace(self.args.data_root,self.args.depth_root,1)  # 相应的深度图路径
+                gt_dp_path = gt_path.replace(self.opt.data_root,self.opt.depth_dir,1)
+            #else:
+            #    haze_path_temp, gt_path = self.img_list[index].split(' ')    # `train/ITS_haze/9542_* train/ITS_clear/9542.png`
+            #    haze_path = random.choice(glob.glob(os.path.join(self.opt.data_root, haze_path_temp)))
 
-                gt_path = gt_path.replace('clear','trans').replace('.png','_'+os.path.basename(haze_path).split('_')[1] + '.png')  # train/ITS_trans/9542_01.png`
-                gt_path = os.path.join(self.opt.data_root, gt_path)
+            #    gt_path = gt_path.replace('clear','trans').replace('.png','_'+os.path.basename(haze_path).split('_')[1] + '.png')  # train/ITS_trans/9542_01.png`
+            #    gt_path = os.path.join(self.opt.data_root, gt_path)
         else:
             raise ValueError("Not Reside Dataset")
 

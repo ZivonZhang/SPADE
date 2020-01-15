@@ -35,7 +35,7 @@ class BaseOptions():
         parser.add_argument('--load_size', type=int, default=1024, help='Scale images to this size. The final image will be cropped to --crop_size.')
         parser.add_argument('--crop_size', type=int, default=512, help='Crop to the width of crop_size (after initially scaling the images to load_size.)')
         parser.add_argument('--aspect_ratio', type=float, default=1.0, help='The ratio width/height. The final height of the load image will be crop_size/aspect_ratio')
-        parser.add_argument('--label_nc', type=int, default=182, help='# of input label classes without unknown class. If you have unknown class as class label, specify --contain_dopntcare_label.')
+        parser.add_argument('--label_nc', type=int, default=3, help='# of input label classes without unknown class. If you have unknown class as class label, specify --contain_dopntcare_label.')
         parser.add_argument('--contain_dontcare_label', action='store_true', help='if the label map contains dontcare label (dontcare=255)')
         parser.add_argument('--output_nc', type=int, default=3, help='# of output image channels')
 
@@ -67,14 +67,15 @@ class BaseOptions():
         parser.add_argument('--use_vae', action='store_true', help='enable training with an image encoder.')
 
         # Custom
-        parser.add_argument('--mask', action='store_true', help='output use mask.')
+        parser.add_argument('--G_shortcut', action='store_true', help='network use G_shortcut.')
+        parser.add_argument('--D_depth', action='store_true', help='discriminator use depth information to judge.')
         parser.add_argument('--use_depth', action='store_true', help="If 'True', use depth infomation in Normalization")
         parser.add_argument('--not_use_cross', action='store_true', help="If 'True', not use cross information of depth and input in Normalization")
         parser.add_argument('--use_512',type=bool,default=False,required=True)  # the default the truly use to experiment
         parser.add_argument('--use_DIF', action='store_true', help="Use DIF instead of SPADE")
         parser.add_argument('--notstrict', action='store_true', help='if specified, not strict in loading weight')
         parser.add_argument('--dep_opposite', action='store_true', help="if 'True', use oppesite of depth")
-        
+        parser.add_argument('--pix_shuffle', action='store_true', help="if 'True', use oppesite of depth")
 
         self.initialized = True
         return parser

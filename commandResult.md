@@ -94,6 +94,18 @@ psnr:  12.257443699125115 ssim: 0.5127268485235905
 
 python train.py  --gpu_ids 1 --name d_hazy_256_depth_opposite --niter 15 --dataset_mode dhazy --use_depth  --dep_opposite --use_512 0 --continue
 
+
+## 2020-01-15 256 D-hazy depth  seg-dep-seg-dep G_shortcut
+python train.py  --gpu_ids 0 --name d_hazy_256_depth_G_shortcut --niter 15 --dataset_mode dhazy --use_depth --G_shortcut --use_512 0 
+python test.py  --gpu_ids 0 --name d_hazy_256_depth_G_shortcut --dataset_mode dhazy --use_depth --G_shortcut --use_512 0
+psnr:  16.668706573097133 ssim: 0.8086218353184269
+
+python train.py  --gpu_ids 0 --name d_hazy_256_depth_G_shortcut_opposite --niter 15 --dataset_mode dhazy --use_depth --G_shortcut --use_512 0 --dep_opposite
+python test.py  --gpu_ids 0 --name d_hazy_256_depth_G_shortcut_opposite --dataset_mode dhazy --use_depth --G_shortcut --use_512 0 --dep_opposite
+psnr:  16.89382451549451 ssim: 0.8046578752881451  几乎没啥变化
+
+python train.py  --gpu_ids 0 --name d_hazy_256_depth_G_shortcut_pixshuffle --niter 15 --dataset_mode dhazy --use_depth --G_shortcut --pix_shuffle --use_512 0
+
 # Test
 
 ## 2020-01-03   256

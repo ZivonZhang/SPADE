@@ -45,10 +45,17 @@ class SPADEGenerator(BaseNetwork):
         self.G_middle_0 = SPADEResnetBlock(16 * nf, 16 * nf, opt)
         self.G_middle_1 = SPADEResnetBlock(16 * nf, 16 * nf, opt)
 
-        self.up_0 = SPADEResnetBlock(16 * nf, 8 * nf, opt)
-        self.up_1 = SPADEResnetBlock(8 * nf, 4 * nf, opt)
-        self.up_2 = SPADEResnetBlock(4 * nf, 2 * nf, opt)
-        self.up_3 = SPADEResnetBlock(2 * nf, 1 * nf, opt)
+        if not opt.pix_shuffle:
+            self.up_0 = SPADEResnetBlock(16 * nf, 8 * nf, opt)
+            self.up_1 = SPADEResnetBlock(8 * nf, 4 * nf, opt)
+            self.up_2 = SPADEResnetBlock(4 * nf, 2 * nf, opt)
+            self.up_3 = SPADEResnetBlock(2 * nf, 1 * nf, opt)
+        else:
+            self.up_0 = SPADEResnetBlock(16 * nf, 16 * nf, opt)
+            self.up_1 = SPADEResnetBlock(16 * nf, 16 * nf, opt)
+            self.up_2 = SPADEResnetBlock(4 * nf, 4 * nf, opt)
+            self.up_3 = SPADEResnetBlock(1 * nf, 1 * nf, opt) 
+            ######
 
         final_nc = nf
 
@@ -58,7 +65,13 @@ class SPADEGenerator(BaseNetwork):
 
         self.conv_img = nn.Conv2d(final_nc, 3, 3, padding=1)
 
-        self.up = nn.Upsample(scale_factor=2)
+        if not opt.pix_shuffle:
+            self.up = nn.Upsample(scale_factor=2)
+            self.up_PS = nn.Upsample(scale_factor=2)
+        else:
+            self.up = nn.Upsample(scale_factor=2)
+            self.up_PS = nn.PixelShuffle(upscale_factor=2)
+
 
     def compute_latent_vector_size(self, opt):
         if opt.num_upsampling_layers == 'normal':  # default
@@ -108,20 +121,20 @@ class SPADEGenerator(BaseNetwork):
             if not self.opt.not_use_cross:
                 x = self.up(x)
                 x = self.up_0(x, depth)
-                x = self.up(x)
-                x = self.up_1(x, seg)
-                x = self.up(x)
+                x = self.up(x)       
+                x = self.up_1(x, seg)   # here need channel 1024
+                x = self.up_PS(x)
                 x = self.up_2(x, depth)
-                x = self.up(x)
+                x = self.up_PS(x)
                 x = self.up_3(x, seg)
             else:
                 x = self.up(x)
                 x = self.up_0(x, depth)
                 x = self.up(x)
                 x = self.up_1(x, depth)
-                x = self.up(x)
+                x = self.up_PS(x)
                 x = self.up_2(x, seg)
-                x = self.up(x)
+                x = self.up_PS(x)
                 x = self.up_3(x, seg)
 
         else:
@@ -129,9 +142,9 @@ class SPADEGenerator(BaseNetwork):
             x = self.up_0(x, seg)
             x = self.up(x)
             x = self.up_1(x, seg)
-            x = self.up(x)
+            x = self.up_PS(x)
             x = self.up_2(x, seg)
-            x = self.up(x)
+            x = self.up_PS(x)
             x = self.up_3(x, seg)
 
         if self.opt.num_upsampling_layers == 'most':
@@ -140,6 +153,8 @@ class SPADEGenerator(BaseNetwork):
 
         x = self.conv_img(F.leaky_relu(x, 2e-1))
         x = F.tanh(x)
+        if self.opt.G_shortcut:
+            x = input + x
 
         return x
 
