@@ -40,13 +40,13 @@ for i, data_i in enumerate(dataloader):
         print('process image... %s' % img_path[b])
         if not opt.use_depth:
             visuals = OrderedDict([('ground_truth', data_i['image'][b]),  ##'real_image', data_i['image'])]
-                                ('input_label', data_i['label'][b]),
-                                ('synthesized_image', generated[b])])
+                                ('synthesized_image', generated[b]),
+                                ('input_label', data_i['label'][b])])
         else:
-            visuals = OrderedDict([('ground_truth', data_i['image'][b]),  ##'real_image', data_i['image'])]
-                                ('input_label', data_i['label'][b]),
-                                ('input_depth', data_i['depth'][b]),
-                                ('synthesized_image', generated[b])])
+            visuals = OrderedDict([('input_label', data_i['label'][b]),
+                                ('ground_truth', data_i['image'][b]),  ##'real_image', data_i['image'])]
+                                ('synthesized_image', generated[b]),
+                                ('input_depth', data_i['depth'][b])])
         visualizer.save_images(webpage, visuals, img_path[b:b + 1])
 
 webpage.save()

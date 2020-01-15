@@ -115,8 +115,11 @@ class Pix2pixDataset(BaseDataset):
             depth = Image.open(depth_path)
             depth = depth.convert('RGB')
 
-            transform_depth = get_transform(self.opt, params,isdepth=True)
-            depth_tensor = transform_depth(depth)
+            transform_depth = get_transform(self.opt, params, isdepth=True)
+            if self.opt.dep_opposite:
+                depth_tensor = -transform_depth(depth)
+            else:
+                depth_tensor = transform_depth(depth)
             
 
         input_dict = {'label': label_tensor,

@@ -27,6 +27,8 @@ class SPADEGenerator(BaseNetwork):
         super().__init__()
         self.opt = opt
         nf = opt.ngf  # default = 64
+        if opt.use_DIF:
+            opt.norm_G = 'spectraldifsyncbatch3x3'
 
         self.sw, self.sh = self.compute_latent_vector_size(opt)  # 计算隐向量大小
 

@@ -70,7 +70,10 @@ class BaseOptions():
         parser.add_argument('--mask', action='store_true', help='output use mask.')
         parser.add_argument('--use_depth', action='store_true', help="If 'True', use depth infomation in Normalization")
         parser.add_argument('--not_use_cross', action='store_true', help="If 'True', not use cross information of depth and input in Normalization")
-        parser.add_argument('--use_512',type=bool,default=True,required=True)
+        parser.add_argument('--use_512',type=bool,default=False,required=True)  # the default the truly use to experiment
+        parser.add_argument('--use_DIF', action='store_true', help="Use DIF instead of SPADE")
+        parser.add_argument('--notstrict', action='store_true', help='if specified, not strict in loading weight')
+        parser.add_argument('--dep_opposite', action='store_true', help="if 'True', use oppesite of depth")
         
 
         self.initialized = True

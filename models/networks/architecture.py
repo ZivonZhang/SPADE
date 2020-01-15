@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import torchvision
 import torch.nn.utils.spectral_norm as spectral_norm
 from models.networks.normalization import SPADE
+from models.networks.normalization import DIF
 
 
 # ResNet block that uses SPADE.
@@ -40,10 +41,21 @@ class SPADEResnetBlock(nn.Module):
 
         # define normalization layers
         spade_config_str = opt.norm_G.replace('spectral', '')
-        self.norm_0 = SPADE(spade_config_str, fin, opt.semantic_nc)
-        self.norm_1 = SPADE(spade_config_str, fmiddle, opt.semantic_nc)
-        if self.learned_shortcut:
-            self.norm_s = SPADE(spade_config_str, fin, opt.semantic_nc)
+
+        if not opt.use_DIF:
+            # SPADE
+            self.norm_0 = SPADE(spade_config_str, fin, opt.semantic_nc)
+            self.norm_1 = SPADE(spade_config_str, fmiddle, opt.semantic_nc)
+            if self.learned_shortcut:
+                self.norm_s = SPADE(spade_config_str, fin, opt.semantic_nc)
+        else:
+            # DIF
+            dif_config_str = spade_config_str.replace('spade','dif')
+            self.norm_0 = DIF(dif_config_str, fin, opt.semantic_nc)
+            self.norm_1 = DIF(dif_config_str, fmiddle, opt.semantic_nc)
+            if self.learned_shortcut:
+                self.norm_s = DIF(dif_config_str, fin, opt.semantic_nc)
+
 
     # note the resnet block with SPADE also takes in |seg|,
     # the semantic segmentation map as input
